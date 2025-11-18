@@ -7,9 +7,12 @@ import yaml from 'yaml'
 const IS_READY = false
 
 describe.runIf(IS_READY)('exports-snapshot', async () => {
-  const packages: { name: string, path: string, private?: boolean }[] = JSON.parse(
-    await x('pnpm', ['ls', '--only-projects', '-r', '--json']).then(r => r.stdout),
-  )
+  const packages: { name: string, path: string, private?: boolean }[]
+    = JSON.parse(
+      await x('pnpm', ['ls', '--only-projects', '-r', '--json']).then(
+        r => r.stdout,
+      ),
+    )
 
   for (const pkg of packages) {
     if (pkg.private)
@@ -19,8 +22,9 @@ describe.runIf(IS_READY)('exports-snapshot', async () => {
         importMode: 'src',
         cwd: pkg.path,
       })
-      await expect(yaml.stringify(manifest.exports))
-        .toMatchFileSnapshot(`./exports/${pkg.name}.yaml`)
+      await expect(yaml.stringify(manifest.exports)).toMatchFileSnapshot(
+        `./exports/${pkg.name}.yaml`,
+      )
     })
   }
 })

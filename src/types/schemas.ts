@@ -3,13 +3,36 @@ export interface ValidationError {
   message: string
 }
 
-export type KeyDataType = 'string' | 'number' | 'date' | 'enum'
+export type KeyDataType
+  = | 'string'
+    | 'number'
+    | 'date'
+    | 'enum'
+    | 'object'
+    | 'array'
 
 export type KeyTuple = string[]
 
 export interface BaseRow {
   idNumber: string
   updatedAt?: string
+}
+
+export interface JSONSchema {
+  $id?: string
+  $schema?: string
+  $ref?: string
+  title?: string
+  type?: 'object' | 'string' | 'number' | 'array' | 'boolean' | 'null'
+  properties?: Record<string, JSONSchema>
+  required?: string[]
+  enum?: readonly unknown[]
+  items?: JSONSchema | JSONSchema[]
+  additionalProperties?: boolean | JSONSchema
+  description?: string
+  format?: string
+  pattern?: string
+  $defs?: Record<string, JSONSchema>
 }
 
 export interface Update {

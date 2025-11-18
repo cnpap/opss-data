@@ -1,4 +1,4 @@
-export type Gender = 'M' | 'F'
+import type { Gender } from './common'
 
 export interface MetabaseRegistrationRecord {
   idType: string

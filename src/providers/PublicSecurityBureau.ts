@@ -13,8 +13,20 @@ export const PublicSecurityBureau: ProviderScript<PSBRow> = {
   topic: 'BasicRegistration',
   map(row) {
     return [
-      { key: ['idNumber', 'idType'], value: row.idType, source: 'PublicSecurityBureau', quality: 90, updatedAt: row.updatedAt },
-      { key: ['idNumber', 'fullName'], value: row.fullName, source: 'PublicSecurityBureau', quality: 90, updatedAt: row.updatedAt },
+      {
+        key: ['idNumber', 'idType'],
+        value: row.idType,
+        source: 'PublicSecurityBureau',
+        quality: 90,
+        updatedAt: row.updatedAt,
+      },
+      {
+        key: ['idNumber', 'fullName'],
+        value: row.fullName,
+        source: 'PublicSecurityBureau',
+        quality: 90,
+        updatedAt: row.updatedAt,
+      },
     ]
   },
 }
