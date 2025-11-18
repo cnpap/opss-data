@@ -10,4 +10,9 @@ logs
 node_modules
 temp
 
+.env
+
 src/metabases/*.md
+src/clickhouse/sql/generated
+
+demo

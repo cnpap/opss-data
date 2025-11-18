@@ -34,12 +34,19 @@
     "start": "tsx src/index.ts",
     "test": "vitest",
     "typecheck": "tsc",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "clickhouse:ping": "dotenvx run -- tsx src/scripts/clickhouse-setup.ts --ping",
+    "clickhouse:apply": "dotenvx run -- tsx src/scripts/clickhouse-setup.ts --create-db --apply",
+    "clickhouse:refresh": "dotenvx run -- tsx src/scripts/generate-clickhouse-ddl.ts --out src/clickhouse/sql/generated ; dotenvx run -- tsx src/scripts/clickhouse-setup.ts --drop-db --create-db --apply --sql-dir src/clickhouse/sql/generated"
+  },
+  "dependencies": {
+    "@clickhouse/client": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",
     "@antfu/ni": "catalog:cli",
     "@antfu/utils": "catalog:inlined",
+    "@dotenvx/dotenvx": "catalog:",
     "@types/node": "catalog:types",
     "bumpp": "catalog:cli",
     "eslint": "catalog:cli",

@@ -7,6 +7,9 @@ packages:
 ignoreWorkspaceRootCheck: true
 shellEmulator: true
 
+catalog:
+  '@clickhouse/client': ^1.13.0
+  '@dotenvx/dotenvx': ^1.51.1
 catalogs:
   cli:
     '@antfu/eslint-config': ^6.2.0
