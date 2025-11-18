@@ -1,9 +1,12 @@
 import type { JSONSchema } from '../../types/schemas'
 
-export const RealEstateCertificates: JSONSchema = {
-  title: '不动产权证信息',
-  type: 'array',
-  items: {
+export const MetabaseForIdNumberAndRealEstateCertificates: JSONSchema = {
+  'title': '不动产权证维度（不动产）',
+  '$id': 'MetabaseForIdNumberAndRealEstateCertificates',
+  '$schema': 'https://json-schema.org/draft/2020-12/schema',
+  'x-parent-keys': ['idNumber'],
+  'type': 'array',
+  'items': {
     type: 'object',
     properties: {
       certificateNumber: { type: 'string', title: '产权证编号' },
@@ -17,5 +20,6 @@ export const RealEstateCertificates: JSONSchema = {
       rightsHolderType: { type: 'string', title: '不动产权利人类型' },
       updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
+    required: ['certificateNumber'],
   },
 }

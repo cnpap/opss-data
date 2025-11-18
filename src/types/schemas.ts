@@ -33,6 +33,7 @@ export interface JSONSchema {
   format?: string
   pattern?: string
   $defs?: Record<string, JSONSchema>
+  ['x-parent-keys']?: string[]
 }
 
 export interface Update {
