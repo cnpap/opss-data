@@ -7,6 +7,9 @@ packages:
 ignoreWorkspaceRootCheck: true
 shellEmulator: true
 
+catalog:
+  '@biomejs/biome': ^2.3.6
+
 catalogs:
   cli:
     '@antfu/eslint-config': ^6.2.0
@@ -28,6 +31,7 @@ catalogs:
     yaml: ^2.8.1
   types:
     '@types/node': ^24.10.0
+
 onlyBuiltDependencies:
   - esbuild
   - simple-git-hooks
