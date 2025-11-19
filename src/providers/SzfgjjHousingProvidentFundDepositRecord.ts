@@ -34,13 +34,12 @@ export const SzfgjjHousingProvidentFundDepositRecord: ProviderScript<SzfgjjHousi
   rowSchema: RowSchema,
   map(row) {
     return [
-      { key: ['idNumber'], field: 'idNumber', value: row.zjhm },
-      { key: ['idNumber'], field: 'fullName', value: row.xingming },
-      { key: ['idNumber', 'personalAccount'], field: 'personalAccount', value: row.grzh },
-      { key: ['idNumber', 'personalAccount'], field: 'depositOrganization', value: row.jcdw },
-      { key: ['idNumber', 'personalAccount'], field: 'depositAmount', value: row.jcje },
-      { key: ['idNumber', 'personalAccount'], field: 'postingDate', value: row.jzrq },
-      { key: ['idNumber', 'personalAccount'], field: 'updatedAt', value: row.swap_data_time },
+      { key: ['idNumber'], field: 'idNumber', value: row.zjhm, updatedAt: row.swap_data_time },
+      { key: ['idNumber'], field: 'fullName', value: row.xingming, updatedAt: row.swap_data_time },
+      { key: ['idNumber', 'personalAccount'], field: 'personalAccount', value: row.grzh, updatedAt: row.swap_data_time },
+      { key: ['idNumber', 'personalAccount'], field: 'depositOrganization', value: row.jcdw, updatedAt: row.swap_data_time },
+      { key: ['idNumber', 'personalAccount'], field: 'depositAmount', value: Number(row.jcje), updatedAt: row.swap_data_time },
+      { key: ['idNumber', 'personalAccount'], field: 'postingDate', value: row.jzrq, updatedAt: row.swap_data_time },
     ]
   },
 }

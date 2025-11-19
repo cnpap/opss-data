@@ -40,8 +40,8 @@ export const NcybjMedicalRetailSettlement: ProviderScript<NcybjMedicalRetailSett
   rowSchema: RowSchema,
   map(row) {
     return [
-      { key: ['idNumber'], field: 'idNumber', value: row.zjhm },
-      { key: ['idNumber'], field: 'fullName', value: row.ryxm },
+      { key: ['idNumber'], field: 'idNumber', value: row.zjhm, updatedAt: row.swap_data_time },
+      { key: ['idNumber'], field: 'fullName', value: row.ryxm, updatedAt: row.swap_data_time },
       { key: [], value: row.jsID },
       { key: [], value: row.rybh },
       { key: [], value: row.ryxm },
@@ -51,7 +51,6 @@ export const NcybjMedicalRetailSettlement: ProviderScript<NcybjMedicalRetailSett
       { key: [], value: row.ylfze },
       { key: [], value: row.jjzfze },
       { key: [], value: row.jgmc },
-      { key: ['idNumber'], field: 'updatedAt', value: row.swap_data_time },
     ]
   },
 }

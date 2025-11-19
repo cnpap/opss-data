@@ -42,13 +42,18 @@
     "postgres:apply": "dotenvx run -- tsx src/scripts/postgres-setup.ts --create-db --apply",
     "postgres:generate-fake": "dotenvx run -- tsx src/scripts/postgres-setup.ts --generate-fake",
     "postgres:refresh": "dotenvx run -- tsx src/scripts/postgres-setup.ts --drop-db --create-db --apply --generate-fake",
-    "fake-data": "dotenvx run -- tsx src/scripts/generate-fake-data.ts"
+    "fake-data": "dotenvx run -- tsx src/scripts/generate-fake-data.ts",
+    "generate-cdc-logs": "dotenvx run -- tsx src/scripts/generate-cdc-logs.ts",
+    "listen-pgoutput": "dotenvx run -- tsx src/scripts/listen-pgoutput.ts",
+    "clickhouse:sync-cdc": "dotenvx run -- tsx src/scripts/apply-cdc-to-clickhouse.ts --dir src/cdc-data",
+    "clickhouse:sync-cdc:dry": "dotenvx run -- tsx src/scripts/apply-cdc-to-clickhouse.ts --dir src/cdc-data --dry-run"
   },
   "dependencies": {
     "@clickhouse/client": "catalog:",
     "@faker-js/faker": "catalog:",
     "dayjs": "catalog:",
-    "pg": "catalog:"
+    "pg": "catalog:",
+    "pg-logical-replication": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:cli",

@@ -78,22 +78,44 @@ async function main() {
     for (const row of res.rows as any[]) {
       const updates = p.map(row)
       const kv = collectKeyValues(updates)
+      const grouped = new Map<string, { op: string, key: string[], pk: Record<string, unknown>, fields: Record<string, unknown>, source: string, updatedAt: string | null }>()
       for (const u of updates) {
         if (!Array.isArray(u.key) || !(u as any).field)
           continue
         const keyPath = u.key.join('-')
         const pk: Record<string, unknown> = {}
-        for (const k of u.key)
-          pk[k] = kv[k]
-        const ev = {
-          op: 'u',
-          key: u.key,
-          pk,
-          field: (u as any).field,
-          value: u.value,
-          source: p.providerName,
-          updatedAt: (u as any).updatedAt ?? row.swap_data_time ?? null,
+        let complete = true
+        for (const k of u.key) {
+          const v = kv[k]
+          if (v == null || v === '') {
+            complete = false
+            break
+          }
+          pk[k] = v
         }
+        if (!complete)
+          continue
+        const updatedAt = (u as any).updatedAt ?? null
+        const exist = grouped.get(keyPath)
+        if (exist) {
+          exist.fields[(u as any).field] = u.value
+          if (!exist.updatedAt && updatedAt)
+            exist.updatedAt = updatedAt
+        }
+        else {
+          const fields: Record<string, unknown> = {}
+          fields[(u as any).field] = u.value
+          grouped.set(keyPath, {
+            op: 'i',
+            key: u.key,
+            pk,
+            fields,
+            source: p.providerName,
+            updatedAt,
+          })
+        }
+      }
+      for (const [keyPath, ev] of grouped) {
         const folder = path.join(baseOutDir, keyPath)
         const arr = eventsByFolder.get(folder) ?? []
         arr.push(ev)

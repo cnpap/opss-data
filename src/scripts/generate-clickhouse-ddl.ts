@@ -130,7 +130,7 @@ function ddlForTable(table: string, columns: string[], orderBy: string[], primar
   const ob = orderBy.map(toSnakeCase).join(', ')
   const pk = primaryKey.map(toSnakeCase).join(', ')
   const cmt = escapeComment(tableComment)
-  const create = `CREATE TABLE IF NOT EXISTS ${toSnakeCase(table)} (\n${cols}\n)\nENGINE = MergeTree()\nORDER BY (${ob})\nPRIMARY KEY (${pk})\nSETTINGS index_granularity = 8192;\n`
+  const create = `CREATE TABLE IF NOT EXISTS ${toSnakeCase(table)} (\n${cols}\n)\nENGINE = ReplacingMergeTree(opss_updated_at_ms)\nORDER BY (${ob})\nPRIMARY KEY (${pk})\nSETTINGS index_granularity = 8192;\n`
   const alter = cmt ? `ALTER TABLE ${toSnakeCase(table)} MODIFY COMMENT '${cmt}';\n` : ''
   return `${create}${alter}`
 }
@@ -189,6 +189,8 @@ async function generate(outDir: string) {
       cols.push(...buildColumnsFromProps(subProps, items.required, specialNonNull))
       if (!cols.some(c => /\bupdated_at\b/i.test(c)))
         cols.push('  updated_at DateTime COMMENT \'更新时间\'')
+      if (!cols.some(c => /\bopss_updated_at_ms\b/i.test(c)))
+        cols.push('  opss_updated_at_ms UInt64')
       const sql = ddlForTable('metabase_for_id_number', cols, ['idNumber', 'updatedAt'], ['idNumber'], schema.title)
       ddls.push({ name: 'metabase_for_id_number', sql })
       continue
@@ -212,6 +214,8 @@ async function generate(outDir: string) {
     cols.push(...buildColumnsFromProps(subProps, items.required, specialNonNull))
     if (!cols.some(c => /\bupdated_at\b/i.test(c)))
       cols.push('  updated_at DateTime COMMENT \'更新时间\'')
+    if (!cols.some(c => /\bopss_updated_at_ms\b/i.test(c)))
+      cols.push('  opss_updated_at_ms UInt64')
     const orderBy = [...primaryKeys, 'updatedAt']
     const primaryKey = [...primaryKeys]
     const sql = ddlForTable(tableName, cols, orderBy, primaryKey, schema.title)
