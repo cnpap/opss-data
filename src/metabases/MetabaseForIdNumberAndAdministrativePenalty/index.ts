@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndAdministrativePenalty: JSONSchema = {
   'title': '行政处罚维度（行政）',
   '$id': 'MetabaseForIdNumberAndAdministrativePenalty',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'decisionDocumentNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -15,7 +15,6 @@ export const MetabaseForIdNumberAndAdministrativePenalty: JSONSchema = {
       penaltyContent: { type: 'string', title: '行政处罚内容' },
       legalBasis: { type: 'string', title: '行政处罚依据' },
       penaltyAuthority: { type: 'string', title: '行政处罚机关' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['decisionDocumentNumber'],
   },

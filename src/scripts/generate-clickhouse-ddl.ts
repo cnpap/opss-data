@@ -52,8 +52,11 @@ function mapType(name: string, schema: JSONSchema | undefined): string {
     return numberTypeByName(name)
   if (schema.type === 'boolean')
     return 'Bool'
-  if (schema.type === 'array')
+  if (schema.type === 'array') {
+    if (schema.items && typeof schema.items === 'object')
+      return 'Array(String)'
     return 'Array(String)'
+  }
   if (schema.type === 'object')
     return 'String'
   return 'String'
@@ -76,6 +79,8 @@ function colLine(name: string, type: string, required: boolean, comment?: string
     return `  ${col} ${type}${cmt ? ` COMMENT '${cmt}'` : ''}`
   if (type.startsWith('Nullable('))
     return `  ${col} ${type}${cmt ? ` COMMENT '${cmt}'` : ''}`
+  if (type.startsWith('Nested('))
+    return `  ${col} ${type}${cmt ? ` COMMENT '${cmt}'` : ''}`
   if (type === 'DateTime' || type === 'Date')
     return `  ${col} Nullable(${type})${cmt ? ` COMMENT '${cmt}'` : ''}`
   return `  ${col} Nullable(${type})${cmt ? ` COMMENT '${cmt}'` : ''}`
@@ -86,6 +91,18 @@ function buildColumnsFromProps(props: Record<string, JSONSchema> | undefined, re
   if (!props)
     return out
   for (const [name, sch] of Object.entries(props)) {
+    if (sch && sch.type === 'array') {
+      const items = sch.items
+      if (items && !Array.isArray(items) && typeof items === 'object' && items.type === 'object') {
+        const itemProps = items.properties || {}
+        const nestedFields = Object.entries(itemProps)
+          .map(([childName, childSchema]) => `${toSnakeCase(childName)} ${mapType(childName, childSchema)}`)
+          .join(', ')
+        const line = `  ${toSnakeCase(name)} Nested(${nestedFields})${sch.title ? ` COMMENT '${escapeComment(sch.title)}'` : ''}`
+        out.push(line)
+        continue
+      }
+    }
     const typ = mapType(name, sch)
     const req = specialNonNull.has(name) || isRequired(name, required)
     out.push(colLine(name, typ, req, sch.title))
@@ -99,6 +116,9 @@ function inferUniqueKeys(items: JSONSchema | undefined): string[] {
 }
 
 function parentKeysFrom(schema: JSONSchema): string[] {
+  const k = (schema as any)['x-keys']
+  if (Array.isArray(k) && k.length)
+    return k as string[]
   const x = (schema as any)['x-parent-keys']
   if (Array.isArray(x) && x.length)
     return x as string[]
@@ -142,6 +162,11 @@ function tailNameFromId(id: string | undefined) {
 async function generate(outDir: string) {
   const metabasesDir = path.resolve(__dirname, '../metabases')
   await fs.mkdir(outDir, { recursive: true })
+  try {
+    const existing = await fs.readdir(outDir)
+    await Promise.all(existing.filter(f => f.endsWith('.sql')).map(f => fs.unlink(path.join(outDir, f)).catch(() => {})))
+  }
+  catch {}
   const files = await loadIndexSchemas(metabasesDir)
   const ddls: { name: string, sql: string }[] = []
   for (const f of files) {
@@ -154,63 +179,41 @@ async function generate(outDir: string) {
     const items = schema.items as JSONSchema
     if (!tail) {
       const props = items.properties || {}
+      const cols: string[] = []
+      cols.push(colLine('idNumber', 'String', true, (items.properties || {}).idNumber?.title || '身份证件号码'))
       const specialNonNull = new Set<string>(['updatedAt'])
-      const basic = props.basicRegistration as JSONSchema | undefined
-      if (basic && basic.type === 'object') {
-        const cols: string[] = []
-        cols.push(colLine('idNumber', 'String', true, (items.properties || {}).idNumber?.title || '身份证件号码'))
-        if (props.idType)
-          cols.push(colLine('idType', mapType('idType', props.idType), true, props.idType.title))
-        if (props.fullName)
-          cols.push(colLine('fullName', mapType('fullName', props.fullName), true, props.fullName.title))
-        cols.push(...buildColumnsFromProps(basic.properties, basic.required, specialNonNull))
-        const sql = ddlForTable('basic_registration', cols, ['idNumber', 'updatedAt'], ['idNumber'], basic.title || schema.title)
-        ddls.push({ name: 'basic_registration', sql })
-      }
-      const phone = props.contactPhone as JSONSchema | undefined
-      if (phone && phone.type === 'array' && phone.items && typeof phone.items === 'object') {
-        const ip = phone.items as JSONSchema
-        const cols: string[] = []
-        cols.push(colLine('idNumber', 'String', true, (items.properties || {}).idNumber?.title || '身份证件号码'))
-        const uniq = inferUniqueKeys(ip)
-        const uniqCols = uniq.length ? uniq : ['phoneNumber']
-        const specialNonNull = new Set<string>(['updatedAt', ...uniqCols])
-        cols.push(...buildColumnsFromProps(ip.properties, ip.required, specialNonNull))
-        const sql = ddlForTable('contact_phone', cols, ['idNumber', ...uniqCols, 'updatedAt'], ['idNumber', ...uniqCols], phone.title || schema.title)
-        ddls.push({ name: 'contact_phone', sql })
-      }
-      const address = props.contactAddress as JSONSchema | undefined
-      if (address && address.type === 'array' && address.items && typeof address.items === 'object') {
-        const ia = address.items as JSONSchema
-        const cols: string[] = []
-        cols.push(colLine('idNumber', 'String', true, (items.properties || {}).idNumber?.title || '身份证件号码'))
-        const uniq = inferUniqueKeys(ia)
-        const uniqCols = uniq.length ? uniq : ['addressName']
-        const specialNonNull = new Set<string>(['updatedAt', ...uniqCols])
-        cols.push(...buildColumnsFromProps(ia.properties, ia.required, specialNonNull))
-        const sql = ddlForTable('contact_address', cols, ['idNumber', ...uniqCols, 'updatedAt'], ['idNumber', ...uniqCols], address.title || schema.title)
-        ddls.push({ name: 'contact_address', sql })
-      }
+      const others = Object.keys(props).filter(k => k !== 'idNumber')
+      const subProps: Record<string, JSONSchema> = {}
+      for (const k of others)
+        subProps[k] = props[k]!
+      cols.push(...buildColumnsFromProps(subProps, items.required, specialNonNull))
+      if (!cols.some(c => /\bupdated_at\b/i.test(c)))
+        cols.push('  updated_at DateTime COMMENT \'更新时间\'')
+      const sql = ddlForTable('metabase_for_id_number', cols, ['idNumber', 'updatedAt'], ['idNumber'], schema.title)
+      ddls.push({ name: 'metabase_for_id_number', sql })
       continue
     }
     const tableName = toSnakeCase(tail || 'unknown')
     const parentKeys = parentKeysFrom(schema)
     const uniq = inferUniqueKeys(items)
+    const primaryKeys = Array.from(new Set([...parentKeys, ...uniq]))
     const specialNonNull = new Set<string>(['updatedAt'])
     const cols: string[] = []
-    for (const pk of parentKeys)
-      cols.push(colLine(pk, 'String', true, (items.properties || {})[pk]?.title || (pk === 'idNumber' ? '身份证件号码' : undefined)))
-    for (const uk of uniq)
-      cols.push(colLine(uk, mapType(uk, (items.properties || {})[uk]), true, (items.properties || {})[uk]?.title))
-    const others = Object.keys(items.properties || {}).filter(k => !parentKeys.includes(k) && !uniq.includes(k))
-    for (const k of others) {
-      const sch = (items.properties || {})[k]
-      const typ = mapType(k, sch)
-      const req = specialNonNull.has(k)
-      cols.push(colLine(k, typ, req, sch.title))
+    for (const k of primaryKeys) {
+      if (k === 'idNumber')
+        cols.push(colLine(k, 'String', true, (items.properties || {}).idNumber?.title || '身份证件号码'))
+      else
+        cols.push(colLine(k, mapType(k, (items.properties || {})[k]), true, (items.properties || {})[k]?.title))
     }
-    const orderBy = [...parentKeys, ...uniq, 'updatedAt']
-    const primaryKey = [...parentKeys, ...uniq]
+    const others = Object.keys(items.properties || {}).filter(k => !primaryKeys.includes(k))
+    const subProps: Record<string, JSONSchema> = {}
+    for (const k of others)
+      subProps[k] = (items.properties || {})[k]!
+    cols.push(...buildColumnsFromProps(subProps, items.required, specialNonNull))
+    if (!cols.some(c => /\bupdated_at\b/i.test(c)))
+      cols.push('  updated_at DateTime COMMENT \'更新时间\'')
+    const orderBy = [...primaryKeys, 'updatedAt']
+    const primaryKey = [...primaryKeys]
     const sql = ddlForTable(tableName, cols, orderBy, primaryKey, schema.title)
     ddls.push({ name: tableName, sql })
   }

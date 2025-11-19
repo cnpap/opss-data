@@ -30,28 +30,28 @@ export function deriveBirthFromId(row: {
     return []
   return [
     {
-      key: ['idNumber', 'basicRegistration', 'birthDate'],
+      key: ['idNumber', 'birthDate'],
       value: `${y}${m}${d}`,
       source: ['idNumber'],
       quality: 100,
       updatedAt: row.updatedAt,
     },
     {
-      key: ['idNumber', 'basicRegistration', 'birthYear'],
+      key: ['idNumber', 'birthYear'],
       value: Number(y),
       source: ['idNumber'],
       quality: 100,
       updatedAt: row.updatedAt,
     },
     {
-      key: ['idNumber', 'basicRegistration', 'birthMonth'],
+      key: ['idNumber', 'birthMonth'],
       value: ym,
       source: ['idNumber'],
       quality: 100,
       updatedAt: row.updatedAt,
     },
     {
-      key: ['idNumber', 'basicRegistration', 'birthDay'],
+      key: ['idNumber', 'birthDay'],
       value: yd,
       source: ['idNumber'],
       quality: 100,
@@ -75,7 +75,7 @@ export function deriveGenderFromId(row: {
   const gender: Gender = Number(gd) % 2 === 1 ? 'M' : 'F'
   return [
     {
-      key: ['idNumber', 'basicRegistration', 'gender'],
+      key: ['idNumber', 'gender'],
       value: gender,
       source: ['idNumber'],
       quality: 100,

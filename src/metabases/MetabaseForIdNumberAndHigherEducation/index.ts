@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndHigherEducation: JSONSchema = {
   'title': '高等教育信息维度（教育）',
   '$id': 'MetabaseForIdNumberAndHigherEducation',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'schoolIdOrGraduatedSchool'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -19,7 +19,6 @@ export const MetabaseForIdNumberAndHigherEducation: JSONSchema = {
       gradeName: { type: 'string', title: '年级名称' },
       className: { type: 'string', title: '班级名称' },
       isImpoverishedStudent: { type: 'boolean', title: '是否困难生' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['schoolIdOrGraduatedSchool'],
     additionalProperties: false,

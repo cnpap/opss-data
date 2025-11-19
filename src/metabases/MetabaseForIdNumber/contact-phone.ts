@@ -7,7 +7,6 @@ export const ContactPhone: JSONSchema = {
     type: 'object',
     properties: {
       phoneNumber: { type: 'string', title: '电话号码' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
   },
 }

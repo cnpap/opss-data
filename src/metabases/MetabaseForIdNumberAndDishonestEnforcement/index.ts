@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndDishonestEnforcement: JSONSchema = {
   'title': '失信被执行维度（司法）',
   '$id': 'MetabaseForIdNumberAndDishonestEnforcement',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'enforcementDocumentNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -15,7 +15,6 @@ export const MetabaseForIdNumberAndDishonestEnforcement: JSONSchema = {
       filingDate: { type: 'string', format: 'date', title: '失信被执行立案日期' },
       performanceStatus: { type: 'string', title: '失信被执行履行情况' },
       listedReasonOrCircumstanceZh: { type: 'string', title: '列入事由/情形（中文名称）' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['enforcementDocumentNumber'],
   },

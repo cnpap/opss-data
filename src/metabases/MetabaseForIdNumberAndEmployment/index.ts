@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndEmployment: JSONSchema = {
   'title': '就业维度（就业）',
   '$id': 'MetabaseForIdNumberAndEmployment',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'employerUSCC'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -18,7 +18,6 @@ export const MetabaseForIdNumberAndEmployment: JSONSchema = {
         format: 'date',
         title: '现任岗位时间',
       },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['employerUSCC'],
     additionalProperties: false,

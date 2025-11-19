@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndJudicialCase: JSONSchema = {
   'title': '司法案件维度（司法）',
   '$id': 'MetabaseForIdNumberAndJudicialCase',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'caseNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -16,7 +16,6 @@ export const MetabaseForIdNumberAndJudicialCase: JSONSchema = {
       judgmentResult: { type: 'string', title: '司法案件判决结果' },
       enforcementCaseClosureDate: { type: 'string', format: 'date', title: '执行案件报结日期' },
       enforcementCaseClosureMethod: { type: 'string', title: '执行案件结案方式' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['caseNumber'],
   },

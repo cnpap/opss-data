@@ -5,7 +5,7 @@ export const MetabaseForIdNumberAndSchool: JSONSchema = {
   'title': '学校维度（教育）',
   '$id': 'MetabaseForIdNumberAndSchool',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'schoolIdOrGraduatedSchool'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -17,7 +17,6 @@ export const MetabaseForIdNumberAndSchool: JSONSchema = {
       className: { type: 'string', title: '班级名称' },
       admissionDate: { type: 'string', format: 'date', title: '入学日期' },
       graduationDate: { type: 'string', format: 'date', title: '毕业日期' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['schoolIdOrGraduatedSchool'],
   },

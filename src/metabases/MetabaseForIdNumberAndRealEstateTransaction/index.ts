@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndRealEstateTransaction: JSONSchema = {
   'title': '房产交易信息维度（不动产）',
   '$id': 'MetabaseForIdNumberAndRealEstateTransaction',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'contractNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -17,7 +17,6 @@ export const MetabaseForIdNumberAndRealEstateTransaction: JSONSchema = {
       houseNumber: { type: 'string', title: '房屋房号' },
       contractNumber: { type: 'string', title: '购房合同编号' },
       contractSigningDate: { type: 'string', format: 'date', title: '购房合同签订日期' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['contractNumber'],
     additionalProperties: false,

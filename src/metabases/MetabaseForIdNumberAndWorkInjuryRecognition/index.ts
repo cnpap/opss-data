@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndWorkInjuryRecognition: JSONSchema = {
   'title': '工伤认定信息维度（人社）',
   '$id': 'MetabaseForIdNumberAndWorkInjuryRecognition',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'recognitionDocumentNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -24,7 +24,6 @@ export const MetabaseForIdNumberAndWorkInjuryRecognition: JSONSchema = {
       occupationalDiseaseName: { type: 'string', title: '职业病名称' },
       monthsOfExposureToHazardousWork: { type: 'number', title: '接触职业病危害月数' },
       injuredBodyPart: { type: 'string', title: '受伤害部位' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['recognitionDocumentNumber'],
     additionalProperties: false,

@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndRealEstateCertificates: JSONSchema = {
   'title': '不动产权证维度（不动产）',
   '$id': 'MetabaseForIdNumberAndRealEstateCertificates',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'certificateNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -18,7 +18,6 @@ export const MetabaseForIdNumberAndRealEstateCertificates: JSONSchema = {
       rightsNature: { type: 'string', title: '不动产权利性质' },
       rightsType: { type: 'string', title: '不动产权利类型' },
       rightsHolderType: { type: 'string', title: '不动产权利人类型' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['certificateNumber'],
   },

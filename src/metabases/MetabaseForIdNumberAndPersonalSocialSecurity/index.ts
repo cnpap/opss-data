@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndPersonalSocialSecurity: JSONSchema = {
   'title': '个人社保信息维度（社保）',
   '$id': 'MetabaseForIdNumberAndPersonalSocialSecurity',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'socialSecurityAccountNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -17,7 +17,6 @@ export const MetabaseForIdNumberAndPersonalSocialSecurity: JSONSchema = {
       hasPensionInsurance: { type: 'boolean', title: '是否参与养老保险' },
       hasWorkInjuryInsurance: { type: 'boolean', title: '是否参与工伤保险' },
       receivesPension: { type: 'boolean', title: '是否领取退休金' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['socialSecurityAccountNumber'],
     additionalProperties: false,

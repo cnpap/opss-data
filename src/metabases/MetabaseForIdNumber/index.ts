@@ -1,20 +1,30 @@
 import type { JSONSchema } from '../../types/schemas'
-import { BasicRegistration } from './basic-registration'
+import { GenderSchema } from '../../types/common'
 import { ContactAddress } from './contact-address'
 import { ContactPhone } from './contact-phone'
 
 export const MetabaseForIdNumber: JSONSchema = {
-  title: '按证件号码维度',
-  $id: 'MetabaseForIdNumber',
-  $schema: 'https://json-schema.org/draft/2020-12/schema',
-  type: 'array',
-  items: {
+  'title': '按证件号码维度',
+  '$id': 'MetabaseForIdNumber',
+  '$schema': 'https://json-schema.org/draft/2020-12/schema',
+  'x-keys': ['idNumber'],
+  'type': 'array',
+  'items': {
     type: 'object',
     properties: {
       idNumber: { type: 'string', title: '身份证件号码' },
       fullName: { type: 'string', title: '姓名' },
       idType: { type: 'string', title: '身份证件类型' },
-      basicRegistration: BasicRegistration,
+      formerName: { type: 'string', title: '曾用名' },
+      gender: GenderSchema,
+      birthDate: { type: 'string', title: '出生日期' },
+      birthYear: { type: 'number', title: '出生年份' },
+      birthMonth: { type: 'number', title: '出生月份' },
+      birthDay: { type: 'number', title: '出生日' },
+      ethnicity: { type: 'string', title: '民族' },
+      nationality: { type: 'string', title: '国籍' },
+      politicalStatus: { type: 'string', title: '政治面貌' },
+      religion: { type: 'string', title: '宗教信仰' },
       contactPhone: ContactPhone,
       contactAddress: ContactAddress,
     },

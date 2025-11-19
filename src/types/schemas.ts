@@ -34,13 +34,14 @@ export interface JSONSchema {
   pattern?: string
   $defs?: Record<string, JSONSchema>
   ['x-parent-keys']?: string[]
+  ['x-keys']?: string[]
 }
 
 export interface Update {
   key: KeyTuple
   value: unknown
-  source: KeyTuple | string
-  quality: number
+  source?: KeyTuple | string
+  quality?: number
   updatedAt?: string
 }
 
@@ -62,7 +63,6 @@ export interface MetabaseDefinition {
 export interface ProviderScript<Row extends object> {
   providerNameZh: string
   providerName: string
-  topic: 'BasicRegistration'
-  rowSchema?: Record<string, string>
+  rowSchema: JSONSchema
   map: (row: Row) => Update[]
 }

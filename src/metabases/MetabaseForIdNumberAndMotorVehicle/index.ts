@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndMotorVehicle: JSONSchema = {
   'title': '机动车维度（交通）',
   '$id': 'MetabaseForIdNumberAndMotorVehicle',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'vehicleIdentificationNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -15,7 +15,6 @@ export const MetabaseForIdNumberAndMotorVehicle: JSONSchema = {
       model: { type: 'string', title: '车辆型号' },
       vehicleType: { type: 'string', title: '车辆类型' },
       drivingLicenseValidTo: { type: 'string', format: 'date', title: '行驶证有效期至' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['vehicleIdentificationNumber'],
   },

@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndProfessionalQualification: JSONSchema = {
   'title': '从业资格维度（就业）',
   '$id': 'MetabaseForIdNumberAndProfessionalQualification',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'qualificationCertificateNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -17,7 +17,6 @@ export const MetabaseForIdNumberAndProfessionalQualification: JSONSchema = {
       validTo: { type: 'string', format: 'date', title: '从业资格证件有效期止' },
       issueDate: { type: 'string', format: 'date', title: '从业资格证件签发日期' },
       firstIssueDate: { type: 'string', format: 'date', title: '从业资格证件初次签发日期' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['qualificationCertificateNumber'],
   },

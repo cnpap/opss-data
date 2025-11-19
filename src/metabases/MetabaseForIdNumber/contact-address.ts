@@ -7,7 +7,6 @@ export const ContactAddress: JSONSchema = {
     type: 'object',
     properties: {
       addressName: { type: 'string', title: '地址名称' },
-      updatedAt: { type: 'string', format: 'date-time', title: '最后更新时间' },
     },
   },
 }

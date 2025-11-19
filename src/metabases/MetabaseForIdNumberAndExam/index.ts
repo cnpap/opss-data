@@ -4,7 +4,7 @@ export const MetabaseForIdNumberAndExam: JSONSchema = {
   'title': '考试维度（教育）',
   '$id': 'MetabaseForIdNumberAndExam',
   '$schema': 'https://json-schema.org/draft/2020-12/schema',
-  'x-parent-keys': ['idNumber'],
+  'x-keys': ['idNumber', 'candidateNumber'],
   'type': 'array',
   'items': {
     type: 'object',
@@ -14,7 +14,6 @@ export const MetabaseForIdNumberAndExam: JSONSchema = {
       candidateNumber: { type: 'string', title: '考生号' },
       subjectName: { type: 'string', title: '科目名称' },
       examScore: { type: 'number', title: '考试成绩' },
-      updatedAt: { type: 'string', format: 'date-time', title: '更新时间' },
     },
     required: ['candidateNumber'],
   },
