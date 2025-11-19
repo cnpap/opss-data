@@ -36,11 +36,12 @@ const RowSchema: JSONSchema = {
 export const NcybjMedicalRetailSettlement: ProviderScript<NcybjMedicalRetailSettlementRow> = {
   providerNameZh: '市医疗保障局',
   providerName: 'NcybjMedicalRetailSettlement',
+  tableName: 'ncybj_02_ncsybddlsqyskmxxx_copy1',
   rowSchema: RowSchema,
   map(row) {
     return [
-      { key: ['idNumber'], value: row.zjhm },
-      { key: ['idNumber', 'fullName'], value: row.ryxm },
+      { key: ['idNumber'], field: 'idNumber', value: row.zjhm },
+      { key: ['idNumber'], field: 'fullName', value: row.ryxm },
       { key: [], value: row.jsID },
       { key: [], value: row.rybh },
       { key: [], value: row.ryxm },
@@ -50,7 +51,7 @@ export const NcybjMedicalRetailSettlement: ProviderScript<NcybjMedicalRetailSett
       { key: [], value: row.ylfze },
       { key: [], value: row.jjzfze },
       { key: [], value: row.jgmc },
-      { key: ['idNumber', 'updatedAt'], value: row.swap_data_time },
+      { key: ['idNumber'], field: 'updatedAt', value: row.swap_data_time },
     ]
   },
 }

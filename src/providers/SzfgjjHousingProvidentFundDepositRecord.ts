@@ -30,16 +30,17 @@ const RowSchema: JSONSchema = {
 export const SzfgjjHousingProvidentFundDepositRecord: ProviderScript<SzfgjjHousingProvidentFundDepositRecordRow> = {
   providerNameZh: '市住房公积金管理中心',
   providerName: 'SzfgjjHousingProvidentFundDepositRecord',
+  tableName: 'szfgjj_grjcmx_copy1',
   rowSchema: RowSchema,
   map(row) {
     return [
-      { key: ['idNumber'], value: row.zjhm },
-      { key: ['idNumber', 'fullName'], value: row.xingming },
-      { key: ['idNumber', 'personalAccount'], value: row.grzh },
-      { key: ['idNumber', 'personalAccount', 'depositOrganization'], value: row.jcdw },
-      { key: ['idNumber', 'personalAccount', 'depositAmount'], value: row.jcje },
-      { key: ['idNumber', 'personalAccount', 'postingDate'], value: row.jzrq },
-      { key: ['idNumber', 'personalAccount', 'updatedAt'], value: row.swap_data_time },
+      { key: ['idNumber'], field: 'idNumber', value: row.zjhm },
+      { key: ['idNumber'], field: 'fullName', value: row.xingming },
+      { key: ['idNumber', 'personalAccount'], field: 'personalAccount', value: row.grzh },
+      { key: ['idNumber', 'personalAccount'], field: 'depositOrganization', value: row.jcdw },
+      { key: ['idNumber', 'personalAccount'], field: 'depositAmount', value: row.jcje },
+      { key: ['idNumber', 'personalAccount'], field: 'postingDate', value: row.jzrq },
+      { key: ['idNumber', 'personalAccount'], field: 'updatedAt', value: row.swap_data_time },
     ]
   },
 }

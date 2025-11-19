@@ -39,6 +39,7 @@ export interface JSONSchema {
 
 export interface Update {
   key: KeyTuple
+  field?: string
   value: unknown
   source?: KeyTuple | string
   quality?: number
@@ -63,6 +64,7 @@ export interface MetabaseDefinition {
 export interface ProviderScript<Row extends object> {
   providerNameZh: string
   providerName: string
+  tableName: string
   rowSchema: JSONSchema
   map: (row: Row) => Update[]
 }

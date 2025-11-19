@@ -6,5 +6,6 @@ export default antfu({
   pnpm: true,
   ignores: [
     './src/metabases/*.md',
+    './src/cdc-data/**',
   ],
 })

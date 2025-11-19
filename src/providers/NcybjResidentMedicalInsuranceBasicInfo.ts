@@ -36,11 +36,12 @@ const RowSchema: JSONSchema = {
 export const NcybjResidentMedicalInsuranceBasicInfo: ProviderScript<NcybjResidentMedicalInsuranceBasicInfoRow> = {
   providerNameZh: '市医疗保障局',
   providerName: 'NcybjResidentMedicalInsuranceBasicInfo',
+  tableName: 'ncybj_01_ncscxjmylbxjbxx_copy1',
   rowSchema: RowSchema,
   map(row) {
     return [
-      { key: ['idNumber'], value: row.sfzh },
-      { key: ['idNumber', 'fullName'], value: row.xm },
+      { key: ['idNumber'], field: 'idNumber', value: row.sfzh },
+      { key: ['idNumber'], field: 'fullName', value: row.xm },
     ]
   },
 }

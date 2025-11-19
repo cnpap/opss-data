@@ -14,5 +14,6 @@ temp
 
 src/metabases/*.md
 src/clickhouse/sql/generated
+src/cdc-data
 
 demo
