@@ -1,7 +1,27 @@
 import type { JSONSchema } from '../../types/schemas'
 import { GenderSchema } from '../../types/common'
-import { ContactAddress } from './contact-address'
-import { ContactPhone } from './contact-phone'
+
+const ContactAddress: JSONSchema = {
+  title: '联系地址',
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      addressName: { type: 'string', title: '地址名称' },
+    },
+  },
+}
+
+const ContactPhone: JSONSchema = {
+  title: '联系电话',
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      phoneNumber: { type: 'string', title: '电话号码' },
+    },
+  },
+}
 
 export const MetabaseForIdNumber: JSONSchema = {
   'title': '按证件号码维度',
