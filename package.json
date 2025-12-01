@@ -46,12 +46,20 @@
     "generate-cdc-logs": "dotenvx run -- tsx src/scripts/generate-cdc-logs.ts",
     "listen-pgoutput": "dotenvx run -- tsx src/scripts/listen-pgoutput.ts",
     "clickhouse:sync-cdc": "dotenvx run -- tsx src/scripts/apply-cdc-to-clickhouse.ts --dir src/cdc-data",
-    "clickhouse:sync-cdc:dry": "dotenvx run -- tsx src/scripts/apply-cdc-to-clickhouse.ts --dir src/cdc-data --dry-run"
+    "clickhouse:sync-cdc:dry": "dotenvx run -- tsx src/scripts/apply-cdc-to-clickhouse.ts --dir src/cdc-data --dry-run",
+    "parquet:generate": "dotenvx run -- tsx src/scripts-v2/generate-parquet.ts",
+    "parquet:generate:streaming": "dotenvx run -- tsx src/scripts-v2/generate-parquet.ts --streaming",
+    "parquet:generate:help": "tsx src/scripts-v2/generate-parquet.ts --help",
+    "parquet:verify": "tsx src/scripts-v2/verify-parquet.ts",
+    "parquet:example": "dotenvx run -- tsx src/scripts-v2/example.ts"
   },
   "dependencies": {
     "@clickhouse/client": "catalog:",
     "@faker-js/faker": "catalog:",
+    "apache-arrow": "catalog:",
     "dayjs": "catalog:",
+    "mysql2": "catalog:",
+    "parquetjs": "catalog:",
     "pg": "catalog:",
     "pg-logical-replication": "catalog:"
   },
@@ -61,6 +69,7 @@
     "@antfu/utils": "catalog:inlined",
     "@dotenvx/dotenvx": "catalog:",
     "@types/node": "catalog:types",
+    "@types/parquetjs": "catalog:",
     "@types/pg": "catalog:",
     "bumpp": "catalog:cli",
     "eslint": "catalog:cli",

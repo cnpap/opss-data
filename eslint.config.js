@@ -8,4 +8,8 @@ export default antfu({
     './src/metabases/*.md',
     './src/cdc-data/**',
   ],
+}, {
+  rules: {
+    'no-console': 'off',
+  },
 })
