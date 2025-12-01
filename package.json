@@ -28,7 +28,6 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "lint": "eslint",
     "prepublishOnly": "nr build",
     "release": "bumpp",
     "start": "tsx src/index.ts",
@@ -64,7 +63,6 @@
     "pg-logical-replication": "catalog:"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "catalog:cli",
     "@antfu/ni": "catalog:cli",
     "@antfu/utils": "catalog:inlined",
     "@dotenvx/dotenvx": "catalog:",
@@ -72,8 +70,6 @@
     "@types/parquetjs": "catalog:",
     "@types/pg": "catalog:",
     "bumpp": "catalog:cli",
-    "eslint": "catalog:cli",
-    "lint-staged": "catalog:cli",
     "simple-git-hooks": "catalog:cli",
     "tinyexec": "catalog:testing",
     "tsdown": "catalog:cli",
@@ -83,11 +79,6 @@
     "vitest": "catalog:testing",
     "vitest-package-exports": "catalog:testing",
     "yaml": "catalog:testing"
-  },
-  "simple-git-hooks": {
-    "pre-commit": "pnpm i --frozen-lockfile --ignore-scripts --offline && npx lint-staged"
-  },
-  "lint-staged": {
-    "*": "eslint --fix"
   }
+
 }

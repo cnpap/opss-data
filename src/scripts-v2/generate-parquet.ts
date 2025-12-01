@@ -7,6 +7,7 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
+import { deriveBirthFromId, deriveGenderFromId } from '../metabases/MetabaseForIdNumber/derivations'
 import { createDatabaseClient, getDatabaseConfigFromEnv } from './database-client'
 import { ParquetWriter } from './parquet-writer'
 
@@ -107,8 +108,6 @@ async function loadMetabases(): Promise<Record<string, JSONSchema>> {
  * 根据 Provider 推断对应的 Metabase
  */
 function inferMetabaseId(providerName: string): string {
-  // 大多数情况下，Provider 名称对应一个二级维度
-  // 例如: SzfgjjHousingProvidentFundDepositRecord -> MetabaseForIdNumberAndHousingProvidentFundDepositRecord
   return `MetabaseForIdNumberAnd${providerName.replace(/^[A-Z][a-z]+/, '')}`
 }
 
@@ -119,63 +118,154 @@ function inferMetabaseId(providerName: string): string {
  * @param updates 所有 updates
  * @param expectedKeyLength 期望的 key 长度（从 Metabase x-keys 获取）
  */
-function aggregateUpdates(updates: Update[], expectedKeyLength: number): Record<string, any>[] {
-  const grouped = new Map<string, Record<string, any>>()
+function collectKeyValues(updates: Update[]) {
+  const m: Record<string, unknown> = {}
+  for (const u of updates) {
+    const f = (u as any).field as string | undefined
+    if (!f)
+      continue
+    if (Array.isArray(u.key)) {
+      if (u.key.includes(f))
+        m[f] = u.value
+    }
+    else if (typeof (u as any).key === 'string' && (u as any).key === f) {
+      m[f] = u.value
+    }
+  }
+  return m
+}
 
-  for (const update of updates) {
-    // 只处理匹配 key 长度的 updates
-    if (update.key.length !== expectedKeyLength) {
+function buildRecordForKeyTuple(
+  rowUpdates: Update[],
+  keyTuple: string[],
+  metabase: JSONSchema,
+): Record<string, any> | null {
+  const kv = collectKeyValues(rowUpdates)
+  for (const k of keyTuple) {
+    const v = kv[k]
+    if (v == null || v === '')
+      return null
+  }
+
+  let properties: Record<string, JSONSchema> | undefined
+  if (metabase.type === 'array' && metabase.items && !Array.isArray(metabase.items) && metabase.items.type === 'object')
+    properties = metabase.items.properties || {}
+  else if (metabase.type === 'object')
+    properties = metabase.properties || {}
+  else
+    properties = {}
+
+  const record: Record<string, any> = {}
+
+  for (const name of Object.keys(properties)) {
+    const updateForField = rowUpdates.find(u => Array.isArray(u.key)
+      && keyStartsWith(u.key, keyTuple)
+      && (
+        (u.field != null && u.field === name)
+        || (u.field == null && u.key.length === keyTuple.length + 1 && u.key[keyTuple.length] === name)
+      ))
+    if (updateForField && updateForField.value !== undefined) {
+      record[name] = updateForField.value
       continue
     }
-
-    const keyStr = update.key.join('|')
-    let record = grouped.get(keyStr)
-
-    if (!record) {
-      record = {}
-      grouped.set(keyStr, record)
-    }
-
-    // 更新字段值
-    if (update.field && update.value !== undefined) {
-      record[update.field] = update.value
+    if (keyTuple.includes(name) && kv[name] !== undefined) {
+      record[name] = kv[name]
     }
   }
 
-  return Array.from(grouped.values())
+  return record
 }
 
 /**
  * 处理单个 provider，转换为维度数据
  * 一个 Provider 可能输出到多个 Metabase（按 key 长度分组）
  */
+function keyStartsWith(a: string[], b: string[]) {
+  if (a.length < b.length)
+    return false
+  for (let i = 0; i < b.length; i++) {
+    if (a[i] !== b[i])
+      return false
+  }
+  return true
+}
+
 async function processProvider(
   provider: ProviderScript<any>,
   client: any,
   metabases: Record<string, JSONSchema>,
   options: GenerateParquetOptions,
+  writers: Map<string, ParquetWriter>,
 ): Promise<void> {
   console.log(`\nProcessing provider: ${provider.providerName} (${provider.providerNameZh})`)
   console.log(`  Table: ${provider.tableName}`)
 
   try {
-    // 从数据库读取原始数据
     const sql = `SELECT * FROM ${provider.tableName}`
     console.log(`  Querying database...`)
 
-    const allUpdates: Update[] = []
-
-    // 流式处理数据
     let rowCount = 0
     const batchSize = options.streamBatchSize || 1000
+    const outputDir = options.outputDir || path.join(process.cwd(), 'output', 'parquet')
 
     for await (const batch of client.stream(sql, batchSize)) {
       rowCount += batch.length
 
-      // 对每一行应用 Provider.map() 转换
       for (const row of batch) {
         const updates = provider.map(row)
-        allUpdates.push(...updates)
+
+        const idUpdate = updates.find(u => u.field === 'idNumber' && u.value != null)
+        const idNumber = typeof idUpdate?.value === 'string' ? idUpdate.value : undefined
+        const updatedAt = idUpdate?.updatedAt || updates.find(u => u.updatedAt)?.updatedAt
+        if (idNumber) {
+          updates.push(...deriveBirthFromId({ idNumber, updatedAt }))
+          updates.push(...deriveGenderFromId({ idNumber, updatedAt }))
+        }
+
+        const keyTuples = Array.from(new Set(
+          updates
+            .filter(u => Array.isArray(u.key) && u.key.length > 0 && u.field != null)
+            .map(u => u.key.join('|')),
+        )).map(s => s.split('|'))
+
+        for (const keyTuple of keyTuples) {
+          let metabaseId: string
+          let metabase: JSONSchema | undefined
+
+          if (keyTuple.length === 1) {
+            metabaseId = 'MetabaseForIdNumber'
+            metabase = metabases[metabaseId]
+          }
+          else {
+            metabaseId = inferMetabaseId(provider.providerName)
+            metabase = metabases[metabaseId]
+          }
+
+          if (!metabase) {
+            continue
+          }
+
+          const record = buildRecordForKeyTuple(updates, keyTuple, metabase)
+          if (!record || Object.keys(record).length === 0) {
+            continue
+          }
+
+          let writer = writers.get(metabaseId)
+          if (!writer) {
+            writer = new ParquetWriter(
+              metabaseId,
+              metabase,
+              {
+                outputDir,
+                batchSize: options.batchSize,
+                compression: options.compression,
+              },
+            )
+            writers.set(metabaseId, writer)
+          }
+
+          await writer.addRow(record)
+        }
       }
 
       if (rowCount % 10000 === 0) {
@@ -184,68 +274,6 @@ async function processProvider(
     }
 
     console.log(`  Loaded ${rowCount} rows from database`)
-    console.log(`  Generated ${allUpdates.length} updates`)
-
-    // 按 key 长度分组
-    const groupedByKeyLength = new Map<number, Update[]>()
-    for (const update of allUpdates) {
-      const keyLength = update.key.length
-      if (!groupedByKeyLength.has(keyLength)) {
-        groupedByKeyLength.set(keyLength, [])
-      }
-      groupedByKeyLength.get(keyLength)!.push(update)
-    }
-
-    console.log(`  Updates grouped by key length: ${Array.from(groupedByKeyLength.keys()).join(', ')}`)
-
-    // 对每个 key 长度生成对应的 Parquet 文件
-    for (const [keyLength, updates] of groupedByKeyLength) {
-      let metabaseId: string
-      let metabase: JSONSchema | undefined
-
-      if (keyLength === 1) {
-        // 一级维度：输出到 MetabaseForIdNumber
-        metabaseId = 'MetabaseForIdNumber'
-        metabase = metabases[metabaseId]
-      }
-      else {
-        // 二级维度：推断 Metabase ID
-        metabaseId = inferMetabaseId(provider.providerName)
-        metabase = metabases[metabaseId]
-      }
-
-      if (!metabase) {
-        console.warn(`  ⚠ No metabase found for key length ${keyLength} (${metabaseId}), skipping...`)
-        continue
-      }
-
-      console.log(`\n  Processing key length ${keyLength} → ${metabaseId}`)
-
-      // 聚合 Updates 到维度数据
-      const dimensionalRecords = aggregateUpdates(updates, keyLength)
-      console.log(`    Aggregated to ${dimensionalRecords.length} dimensional records`)
-
-      if (dimensionalRecords.length === 0) {
-        console.warn(`    ⚠ No records to write, skipping...`)
-        continue
-      }
-
-      // 写入 Parquet
-      const outputDir = options.outputDir || path.join(process.cwd(), 'output', 'parquet')
-      const writer = new ParquetWriter(
-        metabaseId,
-        metabase,
-        {
-          outputDir,
-          batchSize: options.batchSize,
-          compression: options.compression,
-        },
-      )
-
-      await writer.addRows(dimensionalRecords)
-      const outputPath = await writer.finish()
-      console.log(`    ✓ Generated: ${outputPath} (${writer.getRowCount()} rows)`)
-    }
   }
   catch (error) {
     console.error(`✗ Failed to process provider ${provider.providerName}:`, error)
@@ -313,9 +341,16 @@ export async function generateParquet(options: GenerateParquetOptions = {}): Pro
       console.log(`\nProcessing all ${providersToProcess.length} providers`)
     }
 
+    const globalWriters = new Map<string, ParquetWriter>()
     // 处理每个 provider
     for (const provider of providersToProcess) {
-      await processProvider(provider, client, metabases, opts)
+      await processProvider(provider, client, metabases, opts, globalWriters)
+    }
+
+    for (const [metabaseId, writer] of globalWriters) {
+      const outputPath = await writer.finish()
+      console.log(`
+Generated: ${outputPath} (${writer.getRowCount()} rows)`)
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2)
