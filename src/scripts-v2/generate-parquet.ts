@@ -190,6 +190,16 @@ function keyStartsWith(a: string[], b: string[]) {
   return true
 }
 
+function keysEqual(a: string[], b: string[]) {
+  if (a.length !== b.length)
+    return false
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i])
+      return false
+  }
+  return true
+}
+
 async function processProvider(
   provider: ProviderScript<any>,
   client: any,
@@ -229,21 +239,12 @@ async function processProvider(
         )).map(s => s.split('|'))
 
         for (const keyTuple of keyTuples) {
-          let metabaseId: string
-          let metabase: JSONSchema | undefined
-
-          if (keyTuple.length === 1) {
-            metabaseId = 'MetabaseForIdNumber'
-            metabase = metabases[metabaseId]
-          }
-          else {
-            metabaseId = inferMetabaseId(provider.providerName)
-            metabase = metabases[metabaseId]
-          }
-
-          if (!metabase) {
+          const matched = Object.entries(metabases)
+            .find(([id, schema]) => Array.isArray(schema['x-keys']) && keysEqual(schema['x-keys']!, keyTuple))
+          if (!matched)
             continue
-          }
+          const metabaseId = matched[0]
+          const metabase = matched[1]
 
           const record = buildRecordForKeyTuple(updates, keyTuple, metabase)
           if (!record || Object.keys(record).length === 0) {

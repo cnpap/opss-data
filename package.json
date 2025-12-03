@@ -49,7 +49,7 @@
     "parquet:generate": "dotenvx run -- tsx src/scripts-v2/generate-parquet.ts",
     "parquet:generate:streaming": "dotenvx run -- tsx src/scripts-v2/generate-parquet.ts --streaming",
     "parquet:generate:help": "tsx src/scripts-v2/generate-parquet.ts --help",
-    "parquet:verify": "tsx src/scripts-v2/verify-parquet.ts",
+    "parquet:verify": "tsx src/scripts-v2/verify-parquet.ts output/parquet/*.parquet",
     "parquet:example": "dotenvx run -- tsx src/scripts-v2/example.ts"
   },
   "dependencies": {
