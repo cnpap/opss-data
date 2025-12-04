@@ -42,10 +42,21 @@ function jsonSchemaToParquetSchema(schema: JSONSchema): any {
     throw new Error('Schema must be either an array type with items or an object type with properties')
   }
 
+  const keys = Array.isArray(schema['x-keys']) ? schema['x-keys']! : []
+  const propertiesWithKeys: Record<string, JSONSchema> = { ...properties }
+  for (const k of keys) {
+    if (!propertiesWithKeys[k]) {
+      propertiesWithKeys[k] = { type: 'string' }
+    }
+  }
+
+  const requiredSet = new Set(required || [])
+  for (const k of keys) requiredSet.add(k)
+
   const fields: Record<string, any> = {}
 
-  for (const [name, fieldSchema] of Object.entries(properties)) {
-    const isOptional = !required?.includes(name)
+  for (const [name, fieldSchema] of Object.entries(propertiesWithKeys)) {
+    const isOptional = !requiredSet.has(name)
 
     if (fieldSchema.type === 'string') {
       if (fieldSchema.format === 'date') {
@@ -184,8 +195,16 @@ export class ParquetWriter {
     }
 
     // 转换数据
+    const keys = Array.isArray(this.jsonSchema['x-keys']) ? this.jsonSchema['x-keys']! : []
+    const propertiesWithKeys: Record<string, JSONSchema> = { ...properties }
+    for (const k of keys) {
+      if (!propertiesWithKeys[k]) {
+        propertiesWithKeys[k] = { type: 'string' }
+      }
+    }
+
     const convertedRow: Record<string, any> = {}
-    for (const [name, fieldSchema] of Object.entries(properties)) {
+    for (const [name, fieldSchema] of Object.entries(propertiesWithKeys)) {
       convertedRow[name] = convertValue(row[name], fieldSchema)
     }
 

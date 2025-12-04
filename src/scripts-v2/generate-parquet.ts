@@ -173,6 +173,12 @@ function buildRecordForKeyTuple(
     }
   }
 
+  for (const k of keyTuple) {
+    if (record[k] === undefined && kv[k] !== undefined) {
+      record[k] = kv[k]
+    }
+  }
+
   return record
 }
 
