@@ -157,28 +157,17 @@ export function createDatabaseClient(config: DatabaseConfig): DatabaseClient {
  * 兼容新旧两套环境变量：DB_xx 和 PG_xx/MYSQL_xx
  */
 export function getDatabaseConfigFromEnv(): DatabaseConfig {
-  const type = (process.env.DB_TYPE || 'postgres') as 'postgres' | 'mysql'
+  const rawType = process.env.DB_TYPE ? String(process.env.DB_TYPE).toLowerCase() : 'postgres'
+  const type = (rawType === 'mysql' ? 'mysql' : 'postgres') as 'postgres' | 'mysql'
 
-  // 优先使用 PG_*/MYSQL_* 变量（兼容老系统）
-  const host = process.env.DB_HOST || process.env.PG_HOST || process.env.MYSQL_HOST || 'localhost'
-  const port = Number.parseInt(
-    process.env.DB_PORT
-    || process.env.PG_PORT
-    || process.env.MYSQL_PORT
-    || (type === 'postgres' ? '5432' : '3306'),
-  )
-  const user = process.env.DB_USER || process.env.PG_USER || process.env.MYSQL_USER || 'postgres'
-  const password = process.env.DB_PASSWORD || process.env.PG_PASSWORD || process.env.MYSQL_PASSWORD || ''
-  const database = process.env.DB_NAME || process.env.PG_DATABASE || process.env.MYSQL_DATABASE || 'opss'
+  const host = process.env.DB_HOST || 'localhost'
+  const port = Number.parseInt(process.env.DB_PORT || (type === 'postgres' ? '5432' : '3306'), 10)
+  const defaultUser = type === 'postgres' ? 'postgres' : 'root'
+  const user = process.env.DB_USER || defaultUser
+  const password = process.env.DB_PASSWORD || ''
+  const database = process.env.DB_NAME || 'opss'
 
-  return {
-    type,
-    host,
-    port,
-    user,
-    password,
-    database,
-  }
+  return { type, host, port, user, password, database }
 }
 
 /**
